@@ -1,0 +1,25 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { REGIONS, href, type RegionKey } from '../lib/site';
+
+interface Props {
+  entry: CollectionEntry<'regions'>;
+}
+
+const { entry } = Astro.props;
+const key = entry.data.region as RegionKey;
+const meta = REGIONS[key];
+---
+
+<a class={`card region-card region-card--${key}`} href={href(`/regions/${key}/`)}>
+  <div class="region-card__head">
+    <span class="region-card__flag" aria-hidden="true">{meta.flag}</span>
+    <h3 class="region-card__name">{meta.name}</h3>
+    <span class={`pill pill--${key}`}>{meta.short}</span>
+  </div>
+  <p class="region-card__blurb">{meta.blurb}</p>
+  <div class="region-card__meta">
+    <span>更新于 <time datetime={entry.data.updated}>{entry.data.updated}</time></span>
+    <span class="arrow">查看报告 →</span>
+  </div>
+</a>

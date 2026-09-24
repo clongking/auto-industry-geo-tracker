@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+import { SITE_TITLE, SITE_DESCRIPTION, REGIONS, REGION_ORDER, href, nextThursdayBeijing } from '../lib/site';
+import { getLatestUpdated } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** 当前高亮的导航项 */
+  active?: 'home' | 'briefs' | (typeof REGION_ORDER)[number];
+}
+
+const { title, description = SITE_DESCRIPTION, active = 'home' } = Astro.props;
+const pageTitle = title ? `${title} · ${SITE_TITLE}` : SITE_TITLE;
+const latest = await getLatestUpdated();
+const nextUpdate = nextThursdayBeijing();
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href={href('/favicon.svg')} />
+    <title>{pageTitle}</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到正文</a>
+
+    <div class="update-bar" role="status">
+      <div class="container update-bar__inner">
+        <span>
+          <strong>最近更新：</strong>
+          <time datetime={latest ?? undefined}>{latest ?? '—'}</time>
+        </span>
+        <span class="update-bar__sep" aria-hidden="true">·</span>
+        <span>
+          <strong>下次更新：</strong>每周四 18:00（北京时间），预计 <time datetime={nextUpdate}>{nextUpdate}</time>
+        </span>
+      </div>
+    </div>
+
+    <header class="site-header">
+      <div class="container site-header__inner">
+        <a class="brand" href={href('/')}>
+          <span class="brand__mark" aria-hidden="true">车</span>
+          <span class="brand__text">
+            <span class="brand__title">{SITE_TITLE}</span>
+            <span class="brand__sub">地缘政治动态跟踪</span>
+          </span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href={href('/')} aria-current={active === 'home' ? 'page' : undefined}>首页</a>
+          {REGION_ORDER.map((key) => (
+            <a href={href(`/regions/${key}/`)} aria-current={active === key ? 'page' : undefined}>
+              {REGIONS[key].name}
+            </a>
+          ))}
+          <a href={href('/briefs/')} aria-current={active === 'briefs' ? 'page' : undefined}>周报</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container site-footer__inner">
+        <p>{SITE_TITLE} · 报告为中文摘要，所有事实附原始来源链接；标注"待核实/待证实"者为单一来源或推断。</p>
+        <p class="muted">内容由自动任务每周四 18:00（北京时间）刷新并发布至 GitHub Pages。</p>
+      </div>
+    </footer>
+  </body>
+</html>

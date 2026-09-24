@@ -1,0 +1,18 @@
+---
+import Base from '../../layouts/Base.astro';
+import BriefList from '../../components/BriefList.astro';
+import { getBriefsDesc } from '../../lib/content';
+
+const briefs = await getBriefsDesc();
+---
+
+<Base title="周报" active="briefs">
+  <header class="article-head">
+    <span class="eyebrow">周报归档</span>
+    <h1>三区总览周报</h1>
+    <div class="article-head__meta">
+      <span>共 {briefs.length} 期 · 每周四 18:00（北京时间）更新</span>
+    </div>
+  </header>
+  <BriefList briefs={briefs} latestId={briefs[0]?.id} />
+</Base>

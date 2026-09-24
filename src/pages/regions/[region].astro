@@ -1,0 +1,37 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Toc from '../../components/Toc.astro';
+import { REGIONS, formatDateZh, type RegionKey } from '../../lib/site';
+import { getRegionsOrdered } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const regions = await getRegionsOrdered();
+  return regions.map((entry) => ({ params: { region: entry.data.region }, props: { entry } }));
+}
+
+const { entry } = Astro.props;
+const key = entry.data.region as RegionKey;
+const meta = REGIONS[key];
+const { Content, headings } = await render(entry);
+---
+
+<Base title={`${meta.name}区报告`} description={meta.blurb} active={key}>
+  <header class="article-head">
+    <span class={`pill pill--${key}`}>{meta.flag} {meta.name}区滚动报告</span>
+    <h1>{entry.data.title}</h1>
+    <div class="article-head__meta">
+      <span>最近更新：<time datetime={entry.data.updated}>{formatDateZh(entry.data.updated)}</time></span>
+      {entry.data.period && <span>{entry.data.period}</span>}
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <article class="card prose">
+      <Content />
+    </article>
+    <aside>
+      <Toc headings={headings} />
+    </aside>
+  </div>
+</Base>

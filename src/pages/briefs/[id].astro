@@ -1,0 +1,85 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Toc from '../../components/Toc.astro';
+import { href, formatDateZh } from '../../lib/site';
+import { getBriefsDesc } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const briefs = await getBriefsDesc();
+  return briefs.map((entry, i) => ({
+    params: { id: entry.id },
+    props: { entry, newer: briefs[i - 1] ?? null, older: briefs[i + 1] ?? null },
+  }));
+}
+
+const { entry, newer, older } = Astro.props;
+const { Content, headings } = await render(entry);
+---
+
+<Base title={entry.data.title} description={entry.data.summary} active="briefs">
+  <header class="article-head">
+    <span class="eyebrow">三区总览周报</span>
+    <h1>{entry.data.title}</h1>
+    <div class="article-head__meta">
+      <span>期号日期：<time datetime={entry.data.date}>{formatDateZh(entry.data.date)}</time></span>
+      {entry.data.updated && entry.data.updated !== entry.data.date && (
+        <span>内容更新：<time datetime={entry.data.updated}>{entry.data.updated}</time></span>
+      )}
+    </div>
+  </header>
+
+  <div class="article-layout">
+    <article class="card prose">
+      <Content />
+    </article>
+    <aside>
+      <Toc headings={headings} />
+      <nav class="card prose-nav" aria-label="前后期">
+        {older && (
+          <a href={href(`/briefs/${older.id}/`)}>
+            <span class="muted">上一期</span>
+            <span>{older.data.date}</span>
+          </a>
+        )}
+        {newer && (
+          <a href={href(`/briefs/${newer.id}/`)}>
+            <span class="muted">下一期</span>
+            <span>{newer.data.date}</span>
+          </a>
+        )}
+      </nav>
+    </aside>
+  </div>
+</Base>
+
+<style>
+  aside {
+    display: grid;
+    gap: 1rem;
+  }
+  .prose-nav {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.75rem 1.1rem;
+    font-size: 0.9rem;
+  }
+  .prose-nav:empty {
+    display: none;
+  }
+  .prose-nav a {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 900px) {
+    aside {
+      display: contents;
+    }
+    .prose-nav {
+      margin-top: 1rem;
+    }
+  }
+</style>

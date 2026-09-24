@@ -1,0 +1,42 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { href } from '../lib/site';
+
+interface Props {
+  briefs: CollectionEntry<'briefs'>[];
+  latestId?: string;
+}
+
+const { briefs, latestId } = Astro.props;
+---
+
+{
+  briefs.length ? (
+    <ul class="brief-list">
+      {briefs.map((b) => {
+        const [y, m, d] = b.data.date.split('-');
+        return (
+          <li class="card brief-item">
+            <a class="brief-item__date" href={href(`/briefs/${b.id}/`)} aria-label={b.data.date}>
+              <span class="d">{d}</span>
+              <span class="ym">
+                {y}.{m}
+              </span>
+            </a>
+            <div>
+              <h3 class="brief-item__title">
+                <a href={href(`/briefs/${b.id}/`)}>{b.data.title}</a>
+                {b.id === latestId && <span class="pill brief-item__badge">最新</span>}
+              </h3>
+              {b.data.summary && <p class="brief-item__summary">{b.data.summary}</p>}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  ) : (
+    <div class="card empty">
+      <p>尚无周报。</p>
+    </div>
+  )
+}

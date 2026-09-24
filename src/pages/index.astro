@@ -1,0 +1,83 @@
+---
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import RegionCard from '../components/RegionCard.astro';
+import BriefList from '../components/BriefList.astro';
+import { href, formatDateZh } from '../lib/site';
+import { getBriefsDesc, getRegionsOrdered } from '../lib/content';
+
+const briefs = await getBriefsDesc();
+const regions = await getRegionsOrdered();
+const latest = briefs[0];
+
+// 最新一期总览的二级标题即"美国 / 欧洲 / 日本 / 未来节点 / 待证实项"等要点入口
+const latestHeadings = latest
+  ? (await render(latest)).headings.filter((h) => h.depth === 2 && h.text !== '一句话判断')
+  : [];
+---
+
+<Base active="home">
+  <section class="section">
+    {
+      latest ? (
+        <article class="card hero">
+          <div>
+            <span class="eyebrow">最新一期总览 · {formatDateZh(latest.data.date)}</span>
+            <h1 class="hero__title">
+              <a href={href(`/briefs/${latest.id}/`)}>{latest.data.title}</a>
+            </h1>
+          </div>
+          {latest.data.summary && <p class="hero__summary">{latest.data.summary}</p>}
+          {latestHeadings.length > 0 && (
+            <ul class="hero__points">
+              {latestHeadings.map((h) => (
+                <li>
+                  <a href={href(`/briefs/${latest.id}/#${h.slug}`)}>
+                    <span aria-hidden="true">→</span>
+                    <span>{h.text}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div class="hero__actions">
+            <a class="btn" href={href(`/briefs/${latest.id}/`)}>阅读全文</a>
+            <a class="btn btn--ghost" href={href('/briefs/')}>全部周报</a>
+          </div>
+        </article>
+      ) : (
+        <div class="card empty">
+          <p>尚无周报内容。运行 <code>scripts/sync-content.sh</code> 同步报告后重新构建。</p>
+        </div>
+      )
+    }
+  </section>
+
+  <section class="section" aria-labelledby="regions-title">
+    <div class="section__head">
+      <h2 id="regions-title">分区滚动报告</h2>
+      <span class="muted">顶部含本周增量更新小节，保留历史脉络</span>
+    </div>
+    {
+      regions.length ? (
+        <div class="region-grid">
+          {regions.map((r) => (
+            <RegionCard entry={r} />
+          ))}
+        </div>
+      ) : (
+        <div class="card empty">
+          <p>尚无区域报告。</p>
+        </div>
+      )
+    }
+  </section>
+
+  <section class="section" aria-labelledby="briefs-title">
+    <div class="section__head">
+      <h2 id="briefs-title">历史周报</h2>
+      <a class="more" href={href('/briefs/')}>查看全部 →</a>
+    </div>
+    <BriefList briefs={briefs} latestId={latest?.id} />
+  </section>
+</Base>

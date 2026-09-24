@@ -32,11 +32,15 @@ jobs:
 
       # astro.config.mjs 会读取 GITHUB_REPOSITORY（owner/repo）自动推导 site 与 base。
       # 如使用自定义域名，可在仓库 Variables 中设置 SITE_URL / BASE_PATH 覆盖。
+      # SITE_PASSWORD 来自仓库 Secrets：postbuild 会用它加密 dist/ 下所有 HTML；
+      # 在 Actions 中若为空，scripts/encrypt-dist.mjs 会直接让构建失败，防止误发布明文。
       - name: Build
         run: npm run build
         env:
           SITE_URL: ${{ vars.SITE_URL }}
           BASE_PATH: ${{ vars.BASE_PATH }}
+          SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
+          SITE_REMEMBER_DAYS: ${{ vars.SITE_REMEMBER_DAYS }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

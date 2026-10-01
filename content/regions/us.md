@@ -1,10 +1,36 @@
 ---
-title: "美国汽车产业动态跟踪：对华地缘政治与政策（截至 2026 年 9 月 24 日）"
+title: "美国汽车产业动态跟踪：对华地缘政治与政策（截至 2026 年 10 月 1 日）"
 region: "us"
-updated: "2026-09-24"
+updated: "2026-10-01"
 ---
 
-> 覆盖重点：近 3 个月（2026 年 6–9 月）美国针对中国汽车、零部件、电池与车载技术的关税、安全与产业政策，并简述关键政策的时间脉络。所有事实均附来源；标注"待核实/待证实"的信息为推断或单一来源。9 月 24 日增量更新见下节。
+> 覆盖重点：近 3 个月（2026 年 6–9 月）美国针对中国汽车、零部件、电池与车载技术的关税、安全与产业政策，并简述关键政策的时间脉络。所有事实均附来源；标注"待核实/待证实"的信息为推断或单一来源。10 月 1 日增量更新见下节。
+
+## 9 月 25 日–10 月 1 日更新
+
+> 本节为 9 月 25 日至 10 月 1 日（美东时间 10 月 1 日截稿）的增量情报；无新进展的主题已明确标注。
+
+### A. S.4429《互联汽车安全法》与国会立法
+
+- **9 月 30 日：参议院搁置 S.4429，预计推迟至 11 月中期选举后再议。** 美联社报道称，由于参议员们未能就法案文本达成一致，这项两党法案本周不会通过；支持者表示将在选举后再试。该法案由莫雷诺（R-OH）和斯洛特金（D-MI）发起，旨在将中国等"外国关注实体"关联的联网车辆及其软硬件禁令永久写入法律。目前拜登政府时期的商务部规则已事实上禁止中国车企在美销售或建厂。[[AP/WFLA]](https://www.wfla.com/business/ap-business/ap-senate-punts-bill-to-permanently-ban-chinese-cars-until-after-midterm-elections/) [[AP/News4Jax]](https://www.news4jax.com/business/2026/09/30/senate-punts-bill-to-permanently-ban-chinese-cars-until-after-midterm-elections/)
+- **兰德·保罗以涉及奔驰、福特为由反对快速通过。** 彭博法律 9 月 30 日报道，保罗在采访中说："我反对针对梅赛德斯-奔驰……这项法案还针对福特汽车。它们在我所在的州生产电池，我认为试图针对两家优秀的美国公司是错误的做法。"这一表态阻止了参议院以一致同意方式加速表决。[[Bloomberg Law]](https://news.bloomberglaw.com/international-trade/chinese-auto-ban-stalls-before-senate-vote-with-paul-opposed) [[Used Car News]](https://usedcarnews.com/auto-econ-news/rand-paul-puts-the-brakes-on-permanent-chinese-vehicle-ban)
+- **9 月 25 日：莫雷诺、斯洛特金仍借习访华盛机会在参院 floor 上推动表决。** Roll Call 报道，两人在习到访当天呼吁参议院通过该法案，称其为"国家安全风险"，将使美国汽车业处于不利地位；但同日表决未果，随后被推迟至下周，最终仍未通过。[[Roll Call]](https://rollcall.com/2026/09/25/vote-on-chinese-car-imports-bill-sought-as-xi-meets-with-trump/)
+
+### B. USMCA 第四轮谈判：推迟至 10 月，中国仍是核心议题
+
+- **第四轮谈判推迟到 10 月，尚无具体日期。** 9 月 24–28 日报道，原定于 9 月底在华盛顿举行的第四轮谈判因习近平访美及 G20 贸易部长会议被推迟；墨西哥经济部次长罗森多·古铁雷斯表示"未来几周"将宣布新日期，墨方希望年内达成协议。[[El País 9/24]](https://english.elpais.com/economy-and-business/2026-09-24/fourth-round-of-usmca-talks-between-us-and-mexico-postponed-due-to-xi-jinpings-dc-visit.html) [[El País 9/28]](https://english.elpais.com/economy-and-business/2026-09-28/china-the-white-elephant-in-usmca-negotiations.html) [[T21]](https://t21.us/fourth-round-of-mexico-usmca-negotiations-is-set-for-october-supply-chain-among-priorities/)
+- **墨方优先目标：降低 232 关税。** 墨西哥希望把汽车 232 关税从 25% 降至 15%，钢铁从 50% 降至 25%。美方则寻求提高汽车原产地含量（据报道要求 82% 北美含量、50% 美国本土含量），并限制中国零部件、投资与技术进入北美供应链。[[AS/COA]](https://www.as-coa.org/articles/tracking-us-mexico-talks-usmca-review) [[El País 9/28]](https://english.elpais.com/economy-and-business/2026-09-28/china-the-white-elephant-in-usmca-negotiations.html)
+- **美方据报要求墨西哥对非北美钢铝加征 232 式关税，以堵中国转口。** AS/COA 援引彭博报道称，华盛顿希望墨西哥对来自北美以外的钢铁和铝征收类似 232 的关税，以形成共同对华壁垒；若墨方接受，将是"北美对华贸易立场最接近一致的一步"。[[AS/COA]](https://www.as-coa.org/articles/tracking-us-mexico-talks-usmca-review)
+
+### C. 关税与 301 调查
+
+- **301"结构性过剩产能"调查：无新进展。** USTR 官网未发布新裁定或拟议关税。9 月 30 日–10 月 1 日密尔沃基 G20 贸易部长会议上，格里尔将"结构性过剩产能"列为核心议题，并推动全球钢铁过剩产能论坛（GFSEC）形成对华钢铁联合行动框架（有报道称美方希望盟友对标其 50% 钢铁关税）。详见上一期报告来源。
+- **对加拿大 338 条 50% 汽车关税：无新进展。** 9 月 15 日起与 232 叠加的措施仍在执行，未见新豁免或调整公告。
+
+### D. 产业界与企业动态
+
+- **现代汽车 CEO 9 月 18 日（报道于 9 月 26 日）称需要对中国车设置"护栏"。** Jose Munoz 在圣何塞接受路透采访时表示，中国汽车技术进步速度"不可思议"，现代需要"护栏"；同时现代已把部分高级辅助驾驶系统量产计划推迟两年。该报道认为，护栏只能争取时间，无法阻止中国车企长期竞争力。[[The Autowire 9/26]](https://theautowire.com/2026/09/26/hyundai-ceo-chinese-cars-guardrails-buy-time/)
+- **中方拟随访代表团未成行。** 上期已覆盖，本周无进一步消息。
 
 ## 9 月 15–24 日更新
 

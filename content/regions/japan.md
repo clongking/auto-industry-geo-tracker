@@ -1,9 +1,45 @@
 ---
-title: "日本汽车产业对华动态跟踪报告（2026 年 9 月 22 日版；9 月 24 日增补）"
+title: "日本汽车产业对华动态跟踪报告（2026 年 9 月 22 日版；9 月 24 日、10 月 1 日增补）"
 region: "japan"
-updated: "2026-09-24"
-period: "重点覆盖 2026 年 6 月下旬–9 月 22 日"
+updated: "2026-10-01"
+period: "重点覆盖 2026 年 6 月下旬–10 月 1 日"
 ---
+
+## 9 月 25 日–10 月 1 日更新
+
+> 本节汇总 9 月 25 日至 10 月 1 日的增量情报；无新进展的主题已明确标注。
+
+**本时段五大核心进展**
+1. **广汽集团 9 月 28 日披露拟收购一汽丰田 50% 股权，A 股 9 月 29 日复牌。** 交易完成后 FAW 将成为广汽第二大股东，一汽丰田变为 GAC 与丰田的合资，GAC 将同时持有南北丰田股份，便于统一研发、供应链、生产和销售。丰田计划 2027 年 4 月起在华量产 EREV，2028 年目标约 40 万台。[[CNEVPost 9/28]](https://cnevpost.com/2026/09/28/gac-to-buy-50-faw-toyota-coordinate-toyota-china-jvs/) [[Reuters 9/15]](https://www.reuters.com/business/autos-transportation/toyota-revamp-hints-wider-industry-shake-up-china-2026-09-15/)
+2. **日系 8 月在华产销大幅下滑：丰田销量 -22.8%、本田中国前八月产量 -47%、日产销量 -51.9%、产量 -73.3%。** 丰田 8 月全球销量 -6.4%、产量 -5.9%，中国销量连续七个月下滑；本田 8 月全球产量 -12.6%，中国累计产量仅 22.6 万台；日产 8 月在华产量 1.55 万台，为去年同期约四分之一。[[IDNFinancials/Reuters 9/29]](https://www.idnfinancials.com/news/69596/toyota-global-sales-and-production-fall-for-second-straight-month) [[Just Auto 9/30]](https://www.just-auto.com/news/hondas-global-output-drops-13-in-august/) [[Nissan 9/30]](https://global.nissannews.com/en/releases/nissan-production-sales-exports-aug-2026)
+3. **中国对日稀土磁体出口 8 月同比再降 17.1%，此前 7 月降幅 52.2%。** 南早 9 月 20 日援引中国海关数据称，8 月对日稀土永磁体出口约 212 吨（去年同期约 256 吨），稀土金属、化合物、石墨、钨等关键材料出口亦持续下滑；中日关系因台湾问题紧张被视为背景因素。[[SCMP 9/20]](https://www.scmp.com/economy/article/3368153/chinas-trade-limits-continue-bite-japans-imports-rare-earths-other-minerals)
+4. **铃木因稀土短缺暂停 Swift 生产，本田投资无稀土磁铁企业。** 铃木 9 月初因中国出口限制暂停 Swift 车型生产；本田通过 Honda Xcelerator Ventures 投资美国 Niron Magnetics，开发无稀土铁氮永磁体，以降低对中国稀土供应链依赖。[[Maritime Economies/CNBC]](https://maritime-economies.eu/index.php/finance-1/23-banking-news/3776-a-lesson-for-the-west-japan-was-better-prepared-than-most-for-chinas-rare-earth-mineral-squeeze) [[F&I Magazine 9/21]](https://www.fi-magazine.com/news/rare-earths-independence)
+5. **本田在华加速重组：关停车型、本土采购率 99%+、两年推 11 款新车。** 上期已报道本田中国"中国技术、中国成本、中国速度"研发体制重构；本周新报道显示本田已终止 ZR-V、飞度、雅阁 e:PHEV 等车型生产，GAC 本田黄埔工厂将停产，中国 ICE 产能拟从 120 万辆/年压缩至 72 万辆/年。[[CarNewsChina 5/12]](https://carnewschina.com/2026/05/12/honda-ends-zr-v-fit-accord-ephev-production-as-april-sales-collapse-48-in-china/)（背景补录）
+
+### 1. 经济安全与对华政策
+
+- **对华出口管制/稀土：无新的政府间对话进展。** 经产省 8 月 31 日 2027 年度概算要求已在上期覆盖；本周未检索到日中出口管制磋商新消息。
+- **CEV 补贴 2027 年度设计：无新进展。**
+
+### 2. 中国品牌在日动态
+
+- **比亚迪 RACCO/ATTO 2 PHEV：无新的官方销量/交付数据。** 上期报道 RACCO 7 月 28 日上市后订单约 1,500 台，ATTO 2 PHEV 拟 11 月下旬发售；9 月初 JAIA 数据尚未发布。
+
+### 3. 日系在华动态
+
+- **丰田：GAC 收购一汽丰田 50% 股权细节披露。** 广汽 9 月 28 日公告计划发行股份收购中国一汽所持 FAW Toyota 50% 股权；交易将让 GAC 同时持有 FAW Toyota 和 GAC Toyota 股份，形成"南北丰田"统一协调平台。FAW 将成为广汽第二大股东，但广州市国资委仍为广汽实控人。2025 年一汽丰田+广汽丰田合计占中国合资乘用车销量 17.03%。[[CNEVPost 9/28]](https://cnevpost.com/2026/09/28/gac-to-buy-50-faw-toyota-coordinate-toyota-china-jvs/) [[Reuters 9/15]](https://www.reuters.com/business/autos-transportation/toyota-revamp-hints-wider-industry-shake-up-china-2026-09-15/)
+- **本田：8 月中国产量崩塌，继续关停产能。** 本田 8 月全球产量 23.34 万台（-12.6%），其中日本产量 -32%、海外 -9%；1–8 月中国累计产量 22.59 万台（-47%）。作为重组的一部分，GAC 本田黄埔工厂将停产，ZR-V、飞度、雅阁 e:PHEV 等车型进入清库存或停产阶段，中国 ICE 总产能拟从 120 万辆/年降至 72 万辆/年。[[Just Auto 9/30]](https://www.just-auto.com/news/hondas-global-output-drops-13-in-august/) [[CarNewsChina 5/12]](https://carnewschina.com/2026/05/12/honda-ends-zr-v-fit-accord-ephev-production-as-april-sales-collapse-48-in-china/)
+- **日产：8 月在华产量锐减 73.3%，销量下滑 51.9%。** 日产 8 月全球产量 19.15 万台（-19.5%），其中中国产量 1.55 万台（去年同期 5.8 万台）；1–8 月中国累计销量 15.94 万台（-41.9%）。日产称全新 NX7 SUV 正获得市场积极反响，公司正稳步向 NEV 转型。[[Nissan 9/30]](https://global.nissannews.com/en/releases/nissan-production-sales-exports-aug-2026)
+- **马自达/三菱等其他日系：本周无重大新进展。**
+
+### 4. 日本车企全球战略
+
+- **无稀土磁铁布局：** 本田投资 Niron Magnetics，开发铁氮永磁体，降低对中国稀土依赖。[[F&I Magazine 9/21]](https://www.fi-magazine.com/news/rare-earths-independence)
+- **美日关税协议/IEEPA 退税：无新进展。** 第 3 阶段 IEEPA 退税 10 月 6 日启动，汽车 232 关税不在退税范围（上期已覆盖）。
+
+### 5. 中国市场整体
+
+- **9 月中国市场继续走弱，中国品牌份额扩大。** CPCA 数据显示 9 月 1–27 日中国乘用车零售 125.8 万辆（-29% YoY），NEV 零售 82.7 万辆（-20% YoY），NEV 渗透率 65.7%。Automobility 报告称 8 月中国品牌占乘用车出货量 73%，德系、日系继续撤退；BYD 以 145 万辆零售领先。[[CNEVPost 9/30]](https://cnevpost.com/2026/09/30/china-nev-retail-sales-first-27-days-sept/) [[Automobility 9/30]](https://automobility.io/2026/09/state-of-chinas-auto-market-september-2026/)
 
 ## 9 月 15–24 日更新
 

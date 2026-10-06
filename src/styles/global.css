@@ -106,6 +106,66 @@ code {
 .update-bar__sep {
   opacity: 0.5;
 }
+.update-bar__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-left: auto;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.4;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  text-decoration: none;
+  position: relative;
+  transition: background 0.15s ease;
+}
+.update-bar__btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  text-decoration: none;
+}
+.update-bar__btn svg {
+  flex: none;
+}
+/* 简单 tooltip */
+.has-tip::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: max-content;
+  max-width: min(280px, 90vw);
+  padding: 0.5rem 0.7rem;
+  border-radius: 8px;
+  background: var(--text);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 400;
+  line-height: 1.5;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 100;
+  box-shadow: var(--shadow);
+}
+.has-tip:hover::after,
+.has-tip:focus-visible::after {
+  opacity: 1;
+  transform: translateY(0);
+}
+@media (max-width: 640px) {
+  .update-bar__btn {
+    margin-left: 0;
+  }
+  .has-tip::after {
+    right: auto;
+    left: 0;
+  }
+}
 
 /* 站点头部 */
 .site-header {

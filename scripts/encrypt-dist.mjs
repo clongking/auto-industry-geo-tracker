@@ -79,7 +79,7 @@ async function* walkHtml(dir) {
 }
 
 /** 解锁页模板。所有样式与脚本内联，不依赖任何外部资源；页面中只有 <title> 来自原页面。 */
-function renderGate({ title, favicon, iv, ciphertext }) {
+function renderGate({ title, favicon, iv, ciphertext, stylesheets }) {
   const config = JSON.stringify({
     v: 1,
     salt: SALT_HEX,
@@ -88,6 +88,9 @@ function renderGate({ title, favicon, iv, ciphertext }) {
     iv,
     data: ciphertext,
   });
+  const preloadLinks = stylesheets
+    .map((href) => `<link rel="preload" as="style" href="${escapeHtml(href)}">\n<link rel="stylesheet" href="${escapeHtml(href)}">`)
+    .join('\n');
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -96,7 +99,7 @@ function renderGate({ title, favicon, iv, ciphertext }) {
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light">
 ${favicon ? `<link rel="icon" type="image/svg+xml" href="${escapeHtml(favicon)}">` : ''}
-<title>${escapeHtml(title)}</title>
+${preloadLinks ? preloadLinks + '\n' : ''}<title>${escapeHtml(title)}</title>
 <style>
 :root{--bg:#f6f7f9;--surface:#fff;--border:#e2e5ea;--text:#1d2430;--muted:#6b7280;--accent:#1f4e8c;--accent-soft:#e6eef9;--danger:#b91c1c;--danger-soft:#fdeaea;--radius:14px;--shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px -12px rgba(16,24,40,.12);--font:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Helvetica Neue',Arial,system-ui,sans-serif}
 *{box-sizing:border-box}
@@ -269,10 +272,11 @@ async function main() {
     const html = await fs.readFile(file, 'utf8');
     const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() || '受密码保护的页面';
     const favicon = html.match(/<link[^>]+rel=["']icon["'][^>]*href=["']([^"']+)["']/i)?.[1] || '';
+    const stylesheets = Array.from(html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi)).map((m) => m[1]);
 
     const iv = getRandomValues(new Uint8Array(12));
     const ciphertext = await subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(html));
-    const gate = renderGate({ title, favicon, iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)) });
+    const gate = renderGate({ title, favicon, iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)), stylesheets });
 
     // 自检：解锁页中不得残留原页面正文。
     const body = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? '';

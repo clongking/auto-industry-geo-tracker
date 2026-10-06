@@ -86,22 +86,39 @@ src/
 - 正文中的站内链接使用绝对路径（如 `/regions/us/`、`/briefs/2026-09-22/`），构建时会自动加上 `base` 前缀。
 - 正文首个一级标题由同步脚本提取为 frontmatter `title`，页面模板负责渲染标题，正文从二级标题开始。
 
-## 每周更新流程
+## 自动更新流程
 
-内容来源是 Agent Store 中的报告目录（默认 `/cursor/stores/bc-a438253a-cb4f-4745-9de1-27b558da08e2/docs`，可用 `--source` 或环境变量 `STORE_DOCS` 覆盖）。同步脚本会：
+本仓库现在包含两条 GitHub Actions 工作流：
 
-1. `docs/us-auto-dynamics.md` → `content/regions/us.md`（eu、japan 同理），`docs/weekly-brief-YYYY-MM-DD.md` → `content/briefs/YYYY-MM-DD.md`；
-2. 重写 frontmatter（`title`、`region`/`date`、`updated`、`summary`），丢弃来源文件里的内部元数据；
-3. 把指向 `/cursor/stores/...` 的绝对路径链接改写为站内链接；
-4. 内容无变化的文件不会重写。
+| 工作流 | 文件 | 触发方式 | 作用 |
+|---|---|---|---|
+| 自动采集与部署 | `.github/workflows/auto-update.yml` | 每周四 18:00（北京时间）自动、或网站顶部「手动更新」按钮、或 Actions 页手动 Run workflow | 用 Brave Search API 搜索三区最新情报 → 更新 `content/regions/` → 生成 `content/briefs/YYYY-MM-DD.md` → 生成 Word 报告 → 提交并部署 |
+| 仅重新部署 | `.github/workflows/deploy.yml` | push 到 `main` | 从当前 `content/` 构建并发布，不重新采集 |
 
-自动任务（每周四 18:00 北京时间）应在仓库根目录依次执行：
+### 所需 Secrets / Variables
+
+在仓库 **Settings → Secrets and variables → Actions** 中配置：
+
+- **`SITE_PASSWORD`**（Secret）：访问密码，必填。Build 步骤注入该变量，`postbuild` 用它加密所有 HTML。
+- **`BRAVE_API_KEY`**（Secret）：Brave Search API key，"自动采集与部署"工作流需要。请到 https://api.search.brave.com/app/users/signup 注册获取；免费额度每月 2,000 次查询，足够本项目使用。
+
+可选 Variable：
+- `SITE_REMEMBER_DAYS`："记住我"天数，默认 30。
+- `SITE_PASSWORD_SALT`：32 位十六进制盐，一般不改。
+
+### 手动更新按钮
+
+网站顶部更新提示条右侧的「手动更新」按钮会打开 `.github/workflows/auto-update.yml` 的 Actions 页面。点击右上角 **Run workflow** → 再点 **Run workflow**，工作流会自动完成采集、写报告、生成 Word、部署，约 3–5 分钟后网站更新。
+
+### 从 Agent Store 同步（旧路径，可选）
+
+如果仍希望从 Cursor Agent Store 同步人工撰写的深度报告，可使用：
 
 ```bash
 git pull --ff-only origin main
 scripts/sync-content.sh                 # 可加 --date YYYY-MM-DD 指定 updated 日期，默认取北京时间当天
 npm ci
-npm run build                           # 构建校验，失败则中止
+npm run build
 git add content/
 git diff --cached --quiet && echo "内容无变化，跳过提交" || {
   git commit -m "content: 更新报告 $(TZ=Asia/Shanghai date +%F)"
@@ -109,7 +126,7 @@ git diff --cached --quiet && echo "内容无变化，跳过提交" || {
 }
 ```
 
-推送到 `main` 后，GitHub Actions 会自动构建并发布到 GitHub Pages。
+这会覆盖 `content/` 为 Agent Store 中的内容；推送后 `deploy.yml` 会自动构建部署。
 
 ## 部署（GitHub Pages）
 

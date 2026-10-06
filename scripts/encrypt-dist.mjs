@@ -202,9 +202,15 @@ button.primary[disabled]{opacity:.6;cursor:progress}
     return crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64ToBytes(CFG.iv) }, key, b64ToBytes(CFG.data)).then(function(buf){ return dec.decode(buf); });
   }
   function render(html){
-    document.open('text/html', 'replace');
-    document.write(html);
-    document.close();
+    // 不用 document.write（Chrome 下重写文档后外部样式表可能不被应用），
+    // 改用 DOMParser 解析后替换当前文档的 head/body，保留 base URI 与文档上下文。
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(html, 'text/html');
+    document.title = doc.title || document.title;
+    if (doc.documentElement.lang) document.documentElement.lang = doc.documentElement.lang;
+    document.head.innerHTML = doc.head.innerHTML;
+    document.body.innerHTML = doc.body.innerHTML;
+    // 触发 DOMContentLoaded 等事件不一定需要；Astro 静态站点无客户端 JS 依赖。
   }
 
   if (!(window.crypto && crypto.subtle)) {

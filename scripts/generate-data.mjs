@@ -11,13 +11,13 @@ import path from 'node:path';
 import { encrypt } from './lib/crypto.mjs';
 
 const PASSWORD = process.env.SITE_PASSWORD ?? '';
+const DIST_DIR = process.env.DIST_DIR || 'dist';
 
 const [owner, repo] = (process.env.GITHUB_REPOSITORY || '').split('/');
 const isUserSite = repo && repo.toLowerCase() === `${owner}.github.io`.toLowerCase();
 const BASE_PATH = (process.env.BASE_PATH || (repo && !isUserSite ? `/${repo}` : '/')).replace(/\/$/, '');
 
-const DATA_FILE = 'public/data/latest-content.json';
-const ENC_FILE = 'public/data/latest-content.json.enc';
+const ENC_FILE = `${DIST_DIR}/data/latest-content.json.enc`;
 
 function toBeijingDate(d = new Date()) {
   return new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
@@ -132,9 +132,6 @@ async function main() {
     briefs,
   };
 
-  await fs.mkdir(path.dirname(DATA_FILE), { recursive: true });
-  await fs.writeFile(DATA_FILE, JSON.stringify(payload, null, 2), 'utf8');
-
   if (process.env.SITE_NO_PASSWORD === '1') {
     console.log('[generate-data] SITE_NO_PASSWORD=1，跳过加密');
     return;
@@ -146,6 +143,7 @@ async function main() {
 
   const { iv, data, salt, iterations } = await encrypt(JSON.stringify(payload), PASSWORD);
   const encPayload = JSON.stringify({ v: 1, salt, iterations, iv, data });
+  await fs.mkdir(path.dirname(ENC_FILE), { recursive: true });
   await fs.writeFile(ENC_FILE, encPayload, 'utf8');
   console.log(`[generate-data] 已生成并加密 ${ENC_FILE}`);
 }

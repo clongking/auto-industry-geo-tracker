@@ -16,17 +16,11 @@
  */
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
-import { webcrypto } from 'node:crypto';
-
-const { subtle } = webcrypto;
-const getRandomValues = (arr) => webcrypto.getRandomValues(arr);
+import { encrypt, SALT_HEX, PBKDF2_ITERATIONS } from './lib/crypto.mjs';
 
 const DIST_DIR = path.resolve(process.env.DIST_DIR || 'dist');
 const PASSWORD = process.env.SITE_PASSWORD ?? '';
 const REMEMBER_DAYS = Number.parseInt(process.env.SITE_REMEMBER_DAYS || '30', 10) || 30;
-const PBKDF2_ITERATIONS = 600_000;
-// 固定站点盐：与密码无关，公开无妨。保持不变可让「记住我」在重新部署后继续有效。
-const SALT_HEX = (process.env.SITE_PASSWORD_SALT || 'ba6e17bf43354ec48964324aaeac3031').toLowerCase();
 
 const log = (msg) => console.log(`[encrypt-dist] ${msg}`);
 const warn = (msg) => console.warn(`[encrypt-dist] ⚠ ${msg}`);
@@ -35,7 +29,7 @@ const fail = (msg) => {
   process.exit(1);
 };
 
-if (!/^[0-9a-f]{32}$/.test(SALT_HEX)) fail('SITE_PASSWORD_SALT 必须是 32 位十六进制字符串。');
+// 盐在 ./lib/crypto.mjs 中管理
 
 if (!PASSWORD) {
   if (process.env.SITE_NO_PASSWORD === '1') {
@@ -54,21 +48,8 @@ if (!PASSWORD) {
 }
 if (PASSWORD.length < 8) warn('SITE_PASSWORD 短于 8 位，建议使用更长的密码。');
 
-const hexToBytes = (hex) => Uint8Array.from(hex.match(/../g).map((b) => Number.parseInt(b, 16)));
-const toBase64 = (bytes) => Buffer.from(bytes).toString('base64');
 const escapeHtml = (s) =>
   s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-
-async function deriveKey(password, salt) {
-  const material = await subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
-  return subtle.deriveKey(
-    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
-    material,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt'],
-  );
-}
 
 async function* walkHtml(dir) {
   for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
@@ -210,7 +191,15 @@ button.primary[disabled]{opacity:.6;cursor:progress}
     if (doc.documentElement.lang) document.documentElement.lang = doc.documentElement.lang;
     document.head.innerHTML = doc.head.innerHTML;
     document.body.innerHTML = doc.body.innerHTML;
-    // 触发 DOMContentLoaded 等事件不一定需要；Astro 静态站点无客户端 JS 依赖。
+    // innerHTML 插入的 <script> 不会执行，需要手动克隆并替换，才能让原页面内联脚本生效。
+    var scripts = Array.from(document.body.querySelectorAll('script'));
+    scripts.forEach(function(oldScript){
+      var newScript = document.createElement('script');
+      if (oldScript.src) { newScript.src = oldScript.src; }
+      if (oldScript.type) { newScript.type = oldScript.type; }
+      if (oldScript.textContent) { newScript.textContent = oldScript.textContent; }
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
   }
 
   if (!(window.crypto && crypto.subtle)) {
@@ -267,8 +256,6 @@ async function main() {
     fail(`找不到构建目录 ${DIST_DIR}，请先运行 astro build。`);
   }
 
-  const salt = hexToBytes(SALT_HEX);
-  const key = await deriveKey(PASSWORD, salt);
   const files = [];
   for await (const f of walkHtml(DIST_DIR)) files.push(f);
   if (files.length === 0) fail(`${DIST_DIR} 中没有 HTML 文件。`);
@@ -280,9 +267,8 @@ async function main() {
     const favicon = html.match(/<link[^>]+rel=["']icon["'][^>]*href=["']([^"']+)["']/i)?.[1] || '';
     const stylesheets = Array.from(html.matchAll(/<link[^>]+rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi)).map((m) => m[1]);
 
-    const iv = getRandomValues(new Uint8Array(12));
-    const ciphertext = await subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(html));
-    const gate = renderGate({ title, favicon, iv: toBase64(iv), ciphertext: toBase64(new Uint8Array(ciphertext)), stylesheets });
+    const { iv, data } = await encrypt(html, PASSWORD);
+    const gate = renderGate({ title, favicon, iv, ciphertext: data, stylesheets });
 
     // 自检：解锁页中不得残留原页面正文。
     const body = html.match(/<body[^>]*>([\s\S]*)<\/body>/i)?.[1] ?? '';

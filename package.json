@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "postbuild": "node scripts/encrypt-dist.mjs",
+    "postbuild": "node scripts/encrypt-dist.mjs && node scripts/generate-data.mjs",
     "encrypt": "node scripts/encrypt-dist.mjs",
     "preview": "astro preview",
     "sync": "node scripts/sync-content.mjs",

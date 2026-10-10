@@ -6,12 +6,13 @@
 
 | 路径 | 内容 |
 |---|---|
-| `/` | 首页：最新一期总览的"一句话判断"与要点入口、三区报告卡片、历史周报列表 |
+| `/` | 首页：数据驱动壳，解锁后客户端拉取并解密 `data/latest-content.json.enc`，渲染最新一期总览、三区报告卡片、历史周报列表 |
+| `/data/latest-content.json.enc` | 首页数据文件：包含首页全部内容的加密 JSON，带 `?t=...` 缓存清除参数可即时刷新 |
 | `/regions/us/`、`/regions/eu/`、`/regions/japan/` | 美国 / 欧洲 / 日本区滚动报告（顶部为本周增量小节，保留历史） |
 | `/briefs/` | 周报归档 |
 | `/briefs/YYYY-MM-DD/` | 每期三区总览周报 |
 
-页面顶部固定显示「最近更新：YYYY-MM-DD · 下次更新：每周四 18:00（北京时间）」，最近更新日期取自内容 frontmatter，下次更新日期在构建时按北京时间自动计算。
+页面顶部固定显示「最近更新：YYYY-MM-DD · 下次更新：每周四 18:00（北京时间）」。首页在浏览器端解密 JSON 数据后渲染；其他静态页面在构建时渲染。下次更新日期在构建时按北京时间自动计算。
 
 ## 本地运行
 
@@ -26,7 +27,7 @@ npm run preview    # 本地预览 dist/
 
 站点是纯静态托管（GitHub Pages），没有后端，因此采用"静态加密"方案保护内容：
 
-- `npm run build` 结束后自动执行 `postbuild`（`scripts/encrypt-dist.mjs`），把 `dist/` 下**每一个 HTML 页面**整体加密，替换为一个中文解锁页。解锁页中除 `<title>` 外不含任何正文明文，CSS / favicon 等静态资源保持原样。
+- `npm run build` 结束后自动执行 `postbuild`：先由 `scripts/encrypt-dist.mjs` 把 `dist/` 下**每一个 HTML 页面**整体加密，替换为一个中文解锁页；再由 `scripts/generate-data.mjs` 生成并加密首页数据文件 `dist/data/latest-content.json.enc`。解锁页中除 `<title>` 外不含任何正文明文，CSS / favicon 等静态资源保持原样。
 - 加密方式：PBKDF2-SHA256（600,000 次迭代，固定站点盐）从密码派生 256 位 AES-GCM 密钥，每页独立随机 IV。浏览器端用 Web Crypto API 解密后整页渲染，密码不会离开浏览器。
 - **记住我**（默认勾选）：解锁成功后把派生密钥存入 `localStorage`，默认 30 天内站内跳转、重新打开都无需再输入；不勾选则仅存 `sessionStorage`，关闭标签页即失效。派生密钥与密码绑定，改密码后旧密钥自动失效并重新提示输入。
 - 这是前端方案：拿到密码的人可以把页面存下来，浏览器本地也能读到已保存的密钥；它用于阻止随手访问与搜索引擎抓取，不用于对抗有针对性的攻击。
@@ -67,6 +68,8 @@ scripts/
   sync-content.sh     # 同步入口（调用 sync-content.mjs）
   sync-content.mjs    # 从 Agent Store 复制报告、补 frontmatter、改写链接
   encrypt-dist.mjs    # postbuild：用 SITE_PASSWORD 加密 dist/ 下所有 HTML（见「访问密码」）
+  lib/crypto.mjs      # PBKDF2 + AES-GCM 加密/解密，供 encrypt-dist 与 generate-data 共享
+  generate-data.mjs   # postbuild：生成并加密首页数据文件 public/data/latest-content.json.enc
 src/
   content.config.ts   # 两个 collection 的 schema
   layouts/Base.astro  # 全站布局（更新提示条、导航、页脚）
@@ -106,9 +109,13 @@ src/
 - `SITE_REMEMBER_DAYS`："记住我"天数，默认 30。
 - `SITE_PASSWORD_SALT`：32 位十六进制盐，一般不改。
 
+### 首页「刷新内容」按钮
+
+首页解锁后，顶部更新提示条右侧显示「刷新内容」按钮。点击会立即重新 fetch 加密数据文件 `data/latest-content.json.enc`（带时间戳参数清除缓存），使用本地保存的派生密钥解密并重新渲染首页。这不会触发新的网络情报采集，只刷新已发布的最新内容；新的情报采集仍由 `auto-update.yml` 工作流完成。
+
 ### 手动更新按钮
 
-网站顶部更新提示条右侧的「手动更新」按钮会打开 `.github/workflows/auto-update.yml` 的 Actions 页面。点击右上角 **Run workflow** → 再点 **Run workflow**，工作流会自动完成采集、写报告、生成 Word、部署，约 3–5 分钟后网站更新。
+其他静态页面（分区报告、周报归档、周报详情）顶部仍保留「返回首页刷新」按钮，点击回到首页后可用「刷新内容」按钮即时刷新。若需要触发新的网络采集并重新部署，请前往 `.github/workflows/auto-update.yml` 的 Actions 页面，点击右上角 **Run workflow** → 再点 **Run workflow**，约 3–5 分钟后网站更新。
 
 ### 从 Agent Store 同步（旧路径，可选）
 

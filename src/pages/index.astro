@@ -1,83 +1,365 @@
 ---
-import { render } from 'astro:content';
-import Base from '../layouts/Base.astro';
-import RegionCard from '../components/RegionCard.astro';
-import BriefList from '../components/BriefList.astro';
-import { href, formatDateZh } from '../lib/site';
-import { getBriefsDesc, getRegionsOrdered } from '../lib/content';
+import '../styles/global.css';
 
-const briefs = await getBriefsDesc();
-const regions = await getRegionsOrdered();
-const latest = briefs[0];
-
-// 最新一期总览的二级标题即"美国 / 欧洲 / 日本 / 未来节点 / 待证实项"等要点入口
-const latestHeadings = latest
-  ? (await render(latest)).headings.filter((h) => h.depth === 2 && h.text !== '一句话判断')
-  : [];
+// 此页面是"壳"：构建后会被 encrypt-dist 加密成解锁页。
+// 解锁成功后，浏览器内联脚本会 fetch /data/latest-content.json.enc 并解密渲染首页内容。
+const BASE_PATH = import.meta.env.BASE_URL || '/';
+const DATA_URL = `${BASE_PATH}data/latest-content.json.enc`.replace(/\/+/g, '/');
 ---
 
-<Base active="home">
-  <section class="section">
-    {
-      latest ? (
-        <article class="card hero">
-          <div>
-            <span class="eyebrow">最新一期总览 · {formatDateZh(latest.data.date)}</span>
-            <h1 class="hero__title">
-              <a href={href(`/briefs/${latest.id}/`)}>{latest.data.title}</a>
-            </h1>
-          </div>
-          {latest.data.summary && <p class="hero__summary">{latest.data.summary}</p>}
-          {latestHeadings.length > 0 && (
-            <ul class="hero__points">
-              {latestHeadings.map((h) => (
-                <li>
-                  <a href={href(`/briefs/${latest.id}/#${h.slug}`)}>
-                    <span aria-hidden="true">→</span>
-                    <span>{h.text}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-          <div class="hero__actions">
-            <a class="btn" href={href(`/briefs/${latest.id}/`)}>阅读全文</a>
-            <a class="btn btn--ghost" href={href('/briefs/')}>全部周报</a>
-          </div>
-        </article>
-      ) : (
-        <div class="card empty">
-          <p>尚无周报内容。运行 <code>scripts/sync-content.sh</code> 同步报告后重新构建。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light">
+<link rel="icon" type="image/svg+xml" href={`${BASE_PATH}favicon.svg`}>
+<title>美欧日汽车产业对华动态</title>
+<style>
+:root{--bg:#f6f7f9;--surface:#fff;--surface-2:#f0f2f5;--border:#e2e5ea;--text:#1d2430;--text-2:#4b5563;--muted:#6b7280;--accent:#1f4e8c;--accent-soft:#e6eef9;--us:#2563eb;--us-soft:#e8efff;--eu:#7c3aed;--eu-soft:#f1eaff;--japan:#dc2626;--japan-soft:#fdeaea;--radius:14px;--shadow:0 1px 2px rgba(16,24,40,.04),0 8px 24px -12px rgba(16,24,40,.12);--font:'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans CJK SC','Source Han Sans SC','Helvetica Neue',Arial,system-ui,sans-serif}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.7}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.skip-link{position:absolute;left:-9999px}
+.update-bar{background:var(--surface);border-bottom:1px solid var(--border);font-size:13px;color:var(--text-2)}
+.update-bar__inner{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+.update-bar__btn{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--border);border-radius:999px;background:var(--bg);color:var(--text-2);cursor:pointer;font-size:12px}
+.update-bar__btn:hover{background:var(--surface-2);color:var(--text)}
+.update-bar__btn[aria-busy="true"]{opacity:.6;cursor:progress}
+.update-bar__btn svg{animation:none}
+.update-bar__btn[aria-busy="true"] svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.site-header{background:var(--surface);border-bottom:1px solid var(--border)}
+.site-header__inner{max-width:1200px;margin:0 auto;padding:16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.brand{display:flex;align-items:center;gap:12px;color:var(--text)}
+.brand__mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px}
+.brand__text{display:flex;flex-direction:column}
+.brand__title{font-weight:700;font-size:17px}
+.brand__sub{font-size:12px;color:var(--muted)}
+.nav{display:flex;gap:18px}
+.nav a{color:var(--text-2);font-size:14px}
+.nav a[aria-current="page"],.nav a:hover{color:var(--accent)}
+.container{max-width:1200px;margin:0 auto;padding:24px 16px}
+.section{margin-bottom:32px}
+.section__head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.section__head h2{margin:0;font-size:20px}
+.muted{color:var(--muted);font-size:14px}
+.more{font-size:14px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px}
+.hero{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.hero__title{margin:0;font-size:24px;line-height:1.3}
+.hero__title a{color:var(--text)}
+.hero__summary{margin:0;font-size:16px;color:var(--text-2)}
+.hero__points{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
+.hero__points a{display:flex;align-items:center;gap:8px;color:var(--text);padding:12px 14px;background:var(--surface-2);border-radius:10px}
+.hero__points a:hover{background:var(--accent-soft);text-decoration:none}
+.hero__actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:var(--accent);color:#fff;font-size:14px;font-weight:500}
+.btn:hover{background:#16437a;text-decoration:none}
+.btn--ghost{background:transparent;color:var(--accent);border:1px solid var(--border)}
+.btn--ghost:hover{background:var(--accent-soft)}
+.region-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.region-card{color:var(--text);display:flex;flex-direction:column;gap:12px}
+.region-card:hover{text-decoration:none;background:var(--surface-2)}
+.region-card__head{display:flex;align-items:center;gap:10px}
+.region-card__flag{font-size:24px}
+.region-card__name{margin:0;font-size:18px;flex:1}
+.pill{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:600}
+.pill--us{background:var(--us-soft);color:var(--us)}
+.pill--eu{background:var(--eu-soft);color:var(--eu)}
+.pill--japan{background:var(--japan-soft);color:var(--japan)}
+.region-card__blurb{margin:0;font-size:14px;color:var(--text-2);flex:1}
+.region-card__meta{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);margin-top:auto}
+.arrow{color:var(--accent)}
+.brief-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:14px}
+.brief-item{display:flex;gap:14px;align-items:flex-start}
+.brief-item__date{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:56px;padding:10px 8px;background:var(--surface-2);border-radius:10px;text-align:center;color:var(--text)}
+.brief-item__date .d{font-size:22px;font-weight:700;line-height:1}
+.brief-item__date .ym{font-size:11px;color:var(--muted)}
+.brief-item__title{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.brief-item__title a{color:var(--text)}
+.brief-item__badge{background:var(--accent);color:#fff}
+.brief-item__summary{margin:0;font-size:14px;color:var(--text-2);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.site-footer{border-top:1px solid var(--border);padding:20px 16px;text-align:center;font-size:13px;color:var(--muted)}
+.site-footer p{margin:0 0 6px}
+.empty{text-align:center;color:var(--muted);padding:40px}
+/* gate styles */
+.gate-wrap{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;z-index:50}
+.gate-card{width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:32px 28px}
+.gate-brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.gate-brand__mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;font-size:20px}
+.gate-brand__text{font-weight:700;font-size:17px}
+.gate-title{font-size:18px;margin:0 0 6px}
+.gate-desc{margin:0 0 18px;color:var(--muted);font-size:14px}
+.gate-field{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.gate-input-wrap{display:flex;gap:8px}
+.gate-input{flex:1;font:inherit;font-size:16px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text);min-width:0}
+.gate-input:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:var(--accent)}
+.gate-toggle{font:inherit;font-size:13px;padding:0 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--muted);cursor:pointer}
+.gate-toggle:hover{color:var(--text)}
+.gate-remember{display:flex;align-items:center;gap:8px;margin:14px 0 18px;font-size:14px}
+.gate-remember small{color:var(--muted);margin-left:auto;font-size:12px}
+.gate-submit{width:100%;font:inherit;font-size:16px;font-weight:600;padding:11px 14px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+.gate-submit:hover{filter:brightness(1.08)}
+.gate-submit[disabled]{opacity:.6;cursor:progress}
+.gate-msg{min-height:22px;margin:12px 0 0;font-size:14px;color:var(--muted)}
+.gate-msg--error{color:var(--danger);background:var(--danger-soft);border-radius:8px;padding:6px 10px}
+.gate-hint{margin:22px 0 0;font-size:12px;color:var(--muted);border-top:1px solid var(--border);padding-top:14px}
+.hidden{display:none!important}
+@media (max-width:640px){
+  .site-header__inner{flex-direction:column;align-items:flex-start}
+  .nav{width:100%;overflow-x:auto;gap:14px}
+  .update-bar__inner{flex-direction:column;align-items:flex-start}
+}
+</style>
+</head>
+<body>
+  <div id="gate" class="gate-wrap" aria-busy="true">
+    <main class="gate-card">
+      <div class="gate-brand"><span class="gate-brand__mark">车</span><span class="gate-brand__text">美欧日汽车产业对华动态</span></div>
+      <div id="gate-checking"><p style="margin:0">正在检查访问权限…</p></div>
+      <form id="gate-form" class="hidden" autocomplete="off" novalidate>
+        <h1 class="gate-title">请输入访问密码</h1>
+        <p class="gate-desc">本站内容受密码保护。页面在浏览器内解密，密码不会被上传。</p>
+        <label class="gate-field" for="pw">访问密码</label>
+        <div class="gate-input-wrap">
+          <input id="pw" class="gate-input" name="password" type="password" autocomplete="current-password" autofocus required spellcheck="false">
+          <button type="button" class="gate-toggle" id="toggle" aria-label="显示或隐藏密码">显示</button>
         </div>
-      )
-    }
-  </section>
+        <label class="gate-remember"><input type="checkbox" id="remember" checked> 记住我<small>30 天内无需再次输入</small></label>
+        <button type="submit" class="gate-submit" id="submit">解锁</button>
+        <div class="gate-msg" id="msg" role="status" aria-live="polite"></div>
+        <p class="gate-hint">若忘记密码，请联系站点维护者获取。清除浏览器站点数据可退出登录。</p>
+      </form>
+    </main>
+  </div>
 
-  <section class="section" aria-labelledby="regions-title">
-    <div class="section__head">
-      <h2 id="regions-title">分区滚动报告</h2>
-      <span class="muted">顶部含本周增量更新小节，保留历史脉络</span>
+  <div id="app" class="hidden">
+    <a class="skip-link" href="#main">跳到正文</a>
+    <div class="update-bar" role="status">
+      <div class="update-bar__inner">
+        <span><strong>最近更新：</strong><time id="meta-updated"></time></span>
+        <span>·</span>
+        <span><strong>下次更新：</strong>每周四 18:00（北京时间），预计 <time id="meta-next"></time></span>
+        <span>·</span>
+        <button id="refresh-btn" class="update-bar__btn" type="button" title="刷新已发布内容">
+          <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <span id="refresh-text">刷新内容</span>
+        </button>
+      </div>
     </div>
-    {
-      regions.length ? (
-        <div class="region-grid">
-          {regions.map((r) => (
-            <RegionCard entry={r} />
-          ))}
-        </div>
-      ) : (
-        <div class="card empty">
-          <p>尚无区域报告。</p>
-        </div>
-      )
-    }
-  </section>
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="brand" href={`${BASE_PATH}`}>
+          <span class="brand__mark">车</span>
+          <span class="brand__text"><span class="brand__title">美欧日汽车产业对华动态</span><span class="brand__sub">地缘政治动态跟踪</span></span>
+        </a>
+        <nav class="nav" aria-label="主导航">
+          <a href={`${BASE_PATH}`} aria-current="page">首页</a>
+          <a href={`${BASE_PATH}regions/us/`}>美国</a>
+          <a href={`${BASE_PATH}regions/eu/`}>欧洲</a>
+          <a href={`${BASE_PATH}regions/japan/`}>日本</a>
+          <a href={`${BASE_PATH}briefs/`}>周报</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="container">
+      <div id="dashboard">加载中…</div>
+    </main>
+    <footer class="site-footer">
+      <p>美欧日汽车产业对华动态 · 报告为中文摘要，所有事实附原始来源链接；标注"待核实/待证实"者为单一来源或推断。</p>
+      <p class="muted">内容由自动任务每周四 18:00（北京时间）刷新并发布至 GitHub Pages。</p>
+    </footer>
+  </div>
 
-  <section class="section" aria-labelledby="briefs-title">
-    <div class="section__head">
-      <h2 id="briefs-title">历史周报</h2>
-      <a class="more" href={href('/briefs/')}>查看全部 →</a>
-    </div>
-    <BriefList briefs={briefs} latestId={latest?.id} />
-  </section>
-</Base>
+  <script is:inline define:vars={{ dataUrl: DATA_URL, basePath: BASE_PATH }}>
+    (function(){
+      'use strict';
+      var STORE_KEY = 'auto-geo-gate:v1';
+      var REMEMBER_DAYS = 30;
+      var DATA_URL = dataUrl;
+      var BASE_PATH = basePath.replace(/\/$/, '');
+
+      function $(id){ return document.getElementById(id); }
+      var gate = $('gate'), gateForm = $('gate-form'), gateChecking = $('gate-checking'),
+          pw = $('pw'), toggle = $('toggle'), remember = $('remember'),
+          submit = $('submit'), msg = $('msg'), app = $('app'), dashboard = $('dashboard'),
+          refreshBtn = $('refresh-btn'), refreshText = $('refresh-text');
+
+      var enc = new TextEncoder(), dec = new TextDecoder();
+
+      function hexToBytes(h){ var a = new Uint8Array(h.length/2); for(var i=0;i<a.length;i++) a[i]=parseInt(h.substr(i*2,2),16); return a; }
+      function b64ToBytes(b){ var s = atob(b), a = new Uint8Array(s.length); for(var i=0;i<s.length;i++) a[i]=s.charCodeAt(i); return a; }
+      function bytesToB64(bytes){ var s=''; bytes = new Uint8Array(bytes); for(var i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]); return btoa(s); }
+
+      function showForm(){ gateChecking.classList.add('hidden'); gateForm.classList.remove('hidden'); gate.removeAttribute('aria-busy'); try{ pw.focus(); }catch(e){} }
+      function setMsg(text, isError){ msg.textContent = text || ''; msg.className = 'gate-msg' + (isError ? ' gate-msg--error' : ''); }
+      function setBusy(b){ submit.disabled = b; pw.disabled = b; submit.textContent = b ? '正在解锁…' : '解锁'; }
+
+      function readStored(){
+        var raw=null, storage=null;
+        try{ raw = sessionStorage.getItem(STORE_KEY); storage = sessionStorage; }catch(e){}
+        if(!raw){ try{ raw = localStorage.getItem(STORE_KEY); storage = localStorage; }catch(e){} }
+        if(!raw) return null;
+        try{ var o=JSON.parse(raw); if(o && o.k && (!o.exp || o.exp > Date.now())) return o; }catch(e){}
+        try{ storage.removeItem(STORE_KEY); }catch(e){}
+        return null;
+      }
+      function clearStored(){ try{ sessionStorage.removeItem(STORE_KEY); }catch(e){} try{ localStorage.removeItem(STORE_KEY); }catch(e){} }
+      function store(keyB64, persist){ try{ (persist ? localStorage : sessionStorage).setItem(STORE_KEY, JSON.stringify({k:keyB64, exp:persist?Date.now()+REMEMBER_DAYS*864e5:0})); }catch(e){} }
+
+      function deriveKey(password, salt, iterations){
+        return crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']).then(function(material){
+          return crypto.subtle.deriveKey({name:'PBKDF2', salt:salt, iterations:iterations, hash:'SHA-256'}, material, {name:'AES-GCM', length:256}, true, ['decrypt']);
+        });
+      }
+      function decryptData(cfg, key){
+        return crypto.subtle.decrypt({name:'AES-GCM', iv:b64ToBytes(cfg.iv)}, key, b64ToBytes(cfg.data)).then(function(buf){ return dec.decode(buf); });
+      }
+
+      function render(data){
+        $('meta-updated').textContent = data.meta.updatedDisplay || data.meta.updated;
+        $('meta-next').textContent = data.meta.nextUpdateDisplay || data.meta.nextUpdate;
+
+        var html = '<section class="section">' +
+          '<article class="card hero">' +
+          '<div><span class="eyebrow">最新一期总览 · ' + (data.latestBrief.date || '') + '</span>' +
+          '<h1 class="hero__title"><a href="' + data.latestBrief.url + '">' + escapeHtml(data.latestBrief.title) + '</a></h1></div>' +
+          (data.latestBrief.summary ? '<p class="hero__summary">' + escapeHtml(data.latestBrief.summary) + '</p>' : '') +
+          '<ul class="hero__points">';
+        (data.latestBrief.points || []).forEach(function(p){
+          html += '<li><a href="' + data.latestBrief.url + '"><span>→</span><span>' + escapeHtml(p.region) + '</span></a></li>';
+        });
+        html += '</ul>' +
+          '<div class="hero__actions"><a class="btn" href="' + data.latestBrief.url + '">阅读全文</a><a class="btn btn--ghost" href="' + BASE_PATH + '/briefs/">全部周报</a></div>' +
+          '</article></section>' +
+          '<section class="section" aria-labelledby="regions-title"><div class="section__head"><h2 id="regions-title">分区滚动报告</h2><span class="muted">顶部含本周增量更新小节，保留历史脉络</span></div>' +
+          '<div class="region-grid">';
+        data.regions.forEach(function(r){
+          html += '<a class="card region-card region-card--' + r.key + '" href="' + r.url + '">' +
+            '<div class="region-card__head"><span class="region-card__flag">' + (r.key==='us'?'🇺🇸':r.key==='eu'?'🇪🇺':'🇯🇵') + '</span><h3 class="region-card__name">' + escapeHtml(r.name) + '</h3><span class="pill pill--' + r.key + '">' + r.name[0] + '</span></div>' +
+            '<p class="region-card__blurb">' + escapeHtml(r.blurb) + '</p>' +
+            '<div class="region-card__meta"><span>更新于 ' + r.updated + '</span><span class="arrow">查看报告 →</span></div>' +
+            '</a>';
+        });
+        html += '</div></section>' +
+          '<section class="section" aria-labelledby="briefs-title"><div class="section__head"><h2 id="briefs-title">历史周报</h2><a class="more" href="' + BASE_PATH + '/briefs/">查看全部 →</a></div>' +
+          '<ul class="brief-list">';
+        data.briefs.forEach(function(b){
+          var parts = b.date.split('-');
+          html += '<li class="card brief-item"><a class="brief-item__date" href="' + b.url + '"><span class="d">' + parts[2] + '</span><span class="ym">' + parts[0] + '.' + parts[1] + '</span></a>' +
+            '<div><h3 class="brief-item__title"><a href="' + b.url + '">' + escapeHtml(b.title) + '</a>' + (b.isLatest ? '<span class="pill brief-item__badge">最新</span>' : '') + '</h3>' +
+            '<p class="brief-item__summary">' + escapeHtml(b.summary) + '</p></div></li>';
+        });
+        html += '</ul></section>';
+        dashboard.innerHTML = html;
+      }
+
+      function escapeHtml(s){
+        return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; });
+      }
+
+      function unlockAndRender(password, persist){
+        setBusy(true); setMsg('正在校验密码并加载内容…');
+        fetch(DATA_URL + '?t=' + Date.now(), {cache:'no-store'}).then(function(r){
+          if(!r.ok) throw new Error('数据文件加载失败：' + r.status);
+          return r.text();
+        }).then(function(text){
+          var cfg = JSON.parse(text);
+          var salt = hexToBytes(cfg.salt);
+          return deriveKey(password, salt, cfg.iterations).then(function(key){
+            return decryptData(cfg, key).then(function(plain){
+              return crypto.subtle.exportKey('raw', key).then(function(raw){
+                store(bytesToB64(raw), persist);
+                var data = JSON.parse(plain);
+                render(data);
+                gate.classList.add('hidden');
+                app.classList.remove('hidden');
+                document.title = '美欧日汽车产业对华动态';
+              });
+            });
+          });
+        }).catch(function(e){
+          setBusy(false);
+          setMsg(e.message || '密码错误或数据加载失败，请重试。', true);
+        });
+      }
+
+      function refresh(){
+        refreshBtn.setAttribute('aria-busy', 'true');
+        refreshBtn.disabled = true;
+        refreshText.textContent = '刷新中…';
+        var stored = readStored();
+        if(!stored){ window.location.reload(); return; }
+        crypto.subtle.importKey('raw', b64ToBytes(stored.k), {name:'AES-GCM'}, true, ['decrypt']).then(function(key){
+          return fetch(DATA_URL + '?t=' + Date.now(), {cache:'no-store'}).then(function(r){
+            if(!r.ok) throw new Error('HTTP ' + r.status);
+            return r.text();
+          }).then(function(text){
+            var cfg = JSON.parse(text);
+            return decryptData(cfg, key).then(function(plain){
+              render(JSON.parse(plain));
+              refreshText.textContent = '刷新内容';
+            });
+          });
+        }).catch(function(e){
+          refreshText.textContent = '刷新失败';
+          alert('刷新失败：' + (e.message || '未知错误'));
+        }).finally(function(){
+          refreshBtn.removeAttribute('aria-busy');
+          refreshBtn.disabled = false;
+          if(refreshText.textContent === '刷新中…') refreshText.textContent = '刷新内容';
+        });
+      }
+
+      toggle.addEventListener('click', function(){
+        var show = pw.type === 'password';
+        pw.type = show ? 'text' : 'password';
+        toggle.textContent = show ? '隐藏' : '显示';
+        pw.focus();
+      });
+
+      gateForm.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        if(!pw.value){ setMsg('请输入密码。', true); pw.focus(); return; }
+        unlockAndRender(pw.value, remember.checked);
+      });
+
+      refreshBtn.addEventListener('click', refresh);
+
+      if(!(window.crypto && crypto.subtle)){
+        showForm();
+        gateForm.querySelectorAll('input,button').forEach(function(el){ el.disabled = true; });
+        setMsg('当前浏览器不支持 Web Crypto，无法解锁。', true);
+        return;
+      }
+
+      var stored = readStored();
+      if(!stored){ showForm(); return; }
+      // 有记住的密钥，直接加载
+      gateChecking.innerHTML = '<p style="margin:0">正在加载内容…</p>';
+      crypto.subtle.importKey('raw', b64ToBytes(stored.k), {name:'AES-GCM'}, true, ['decrypt']).then(function(key){
+        return fetch(DATA_URL + '?t=' + Date.now(), {cache:'no-store'}).then(function(r){
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        }).then(function(text){
+          var cfg = JSON.parse(text);
+          return decryptData(cfg, key).then(function(plain){
+            render(JSON.parse(plain));
+            gate.classList.add('hidden');
+            app.classList.remove('hidden');
+          });
+        });
+      }).catch(function(e){
+        clearStored();
+        showForm();
+        setMsg('访问密码已更新或数据加载失败，请重新输入。');
+      });
+    })();
+  </script>
+</body>
+</html>
